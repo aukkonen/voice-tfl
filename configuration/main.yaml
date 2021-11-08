@@ -1,4 +1,4 @@
-enable:strict_nlu: true
+enable_strict_nlu: true
 imports:
   - name: naptan_id
     source: underground.csv
