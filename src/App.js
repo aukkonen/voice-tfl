@@ -1,7 +1,6 @@
 import './App.css';
 import { useState, useEffect } from 'react';
 import { useSpeechContext } from '@speechly/react-client';
-import { BigTranscript, PushToTalkButton } from '@speechly/react-ui';
 
 const SearchForm = (props) => {
   const entities = props.entities;
@@ -131,11 +130,6 @@ function App() {
   const entities = parseEntities(segment);
   return (
       <div className="App">
-        <BigTranscript
-         placement="top"
-         formatText={false}
-        />
-        <PushToTalkButton captureKey=" " placement="bottom" />
         <SearchForm entities={entities} />
        {data &&
          data.journeys?.map((journey, idx) => (
