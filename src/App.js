@@ -4,7 +4,6 @@ import { useSpeechContext } from '@speechly/react-client';
 
 const SearchForm = (props) => {
   const entities = props.entities;
-  console.log(entities);
   return (
     <div>
       <div>
@@ -17,25 +16,64 @@ const SearchForm = (props) => {
   )
 }
 
+function parseEndpoints(endpoints) {
+  return "towards " + endpoints.join(' or ');
+}
+
+function RouteOption(props) {
+  const option = props.opt;
+  const endpoints = option.directions.map(stationName => stationName.replace(' Underground Station', ''));
+  return (
+    <div className="routeOptionBox">
+      <div className="routeOption">
+        <div className="lineNameContainer">
+          <div className={"lineName " + option.name.toLowerCase()}>{option.name}</div>
+        </div>
+        <div className="routeOptionEndpoints">
+          {parseEndpoints(endpoints)}
+        </div>
+      </div>
+    {!props.isLast &&
+      <div>or</div>
+    }
+    </div>
+  )
+}
+
 function Leg(props) {
   const leg = props.leg;
   return (
-      <div>
-      {leg.departurePoint.commonName} to {leg.arrivalPoint.commonName}
-      </div>
+    <>
+    <div>
+      {leg.routeOptions.map((opt, idx) => (
+          <RouteOption key={idx} opt={opt} optIdx={idx + 1} isLast={idx === leg.routeOptions.length-1}/>
+      ))}
+    </div>
+    <div className="station">
+      {leg.arrivalPoint.commonName}
+    </div>
+    </>
   )
 }
 
 function Journey(props) {
   const journey = props.journey;
+  let fare = 0.0;
+  if (journey.fare) {
+    fare = journey.fare?.totalCost/100.0;
+  }
+  fare = fare.toFixed(2);
   return (
     <div className="journey">
-      <div>
-      duration: {journey.duration} depart: {parseTime(journey.startDateTime)} arrival: {parseTime(journey.arrivalDateTime)} fare: {journey.fare?.totalCost | 0}
+      <div className="journeyHeader">
+      {journey.duration} minutes ({parseTime(journey.startDateTime)} &#8594; {parseTime(journey.arrivalDateTime)}) &nbsp; fare £{fare}
       </div>
       <div>
+        <div className="station">
+          {journey.legs[0].departurePoint.commonName}
+        </div>
         {journey.legs.map((leg, idx) => (
-          <Leg leg={leg} />
+          <Leg key={idx} leg={leg} />
         ))}
       </div>
     </div>
@@ -51,7 +89,6 @@ function callApi(from, to, time, timeIs, setData) {
   if (time !== undefined) {
     url = `https://api.tfl.gov.uk/Journey/JourneyResults/${from}/to/${to}?time=${time}&timeIs=${timeIs}`;
   }
-  console.log('calling', url);
   fetch(url, {method: 'GET'})
     .then(res => res.json())
     .then(data => {
@@ -105,11 +142,9 @@ function parseEntities(segment) {
 function App() {
   const { segment } = useSpeechContext();
   const [data, setData] = useState(undefined);
-  console.log(segment);
 
   useEffect(() => {
     if (segment && segment.isFinal) {
-      console.log('segment is final!');
       const entities = parseEntities(segment);
       let time = undefined;
       let timeType = undefined;

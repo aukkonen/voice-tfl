@@ -1,7 +1,101 @@
 .App {
-  text-align: center;
+  text-align: left;
 }
 
 .journey {
     padding: 10px;
+    border-top: 1px solid black;
+    margin-bottom: 10px;
+}
+
+.journeyHeader {
+    padding-bottom: 5px;
+}
+
+.station {
+    padding-left: 10px;
+    background-color: LightBlue;
+    font-weight: bold;
+}
+
+.routeOptionBox {
+    margin: 5px 5px 5px 5px;
+}
+
+.routeOption {
+    display: flex;
+    flex-direction: row;
+    background-color: MintCream;
+}
+
+.lineNameContainer {
+    flex-shrink: 0;
+    min-width: 6rem;
+}
+
+.lineName {
+    font-weight: bold;
+    text-align: center;
+}
+
+.routeOptionEndpoints {
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+    font-style: italic;
+}
+
+.bakerloo {
+    color: #ffffff;
+    background-color: #AE6118;
+}
+
+.central {
+    color: #FFFFFF;
+    background-color: #E41F1F;
+}
+
+.circle {
+    color: #113892;
+    background-color: #F8D42D;
+}
+
+.district {
+    color: #FFFFFF;
+    background-color: #007229;
+}
+
+.victoria {
+    color: #FFFFFF;
+    background-color: #009FE0;
+}
+
+.hammersmith {
+    color: #113892;
+    background-color: #E899A8;
+}
+
+.jubilee {
+    color: #FFFFFF;
+    background-color: #686E72;
+}
+
+.metropolitan {
+    color: #FFFFFF;
+    background-color: #893267;
+}
+
+.northern {
+    color: #FFFFFF;
+    background-color: #000000;
+}
+
+.overground {
+    color: #FFFFFF;
+    background-color: #F86;
+}
+
+.piccadilly {
+    color: #FFFFFF;
+    background-color: #0450A1;
 }
