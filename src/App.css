@@ -1,5 +1,50 @@
 .App {
-  text-align: left;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+h1 {
+    font-size: 18px;
+    margin-left: 5px;
+}
+
+p {
+    margin-left: 5px;
+    margin-top: 0px;
+}
+
+.inputFieldContainer {
+    margin: 10px 10px 10px 10px;
+    display: flex;
+}
+
+.inputField {
+    font-size: 16px;
+    color: grey;
+}
+
+.stationInput {
+    width: 70%;
+}
+
+.timeInput {
+    width: 30%;
+}
+
+.infoButton {
+    text-align: right;
+}
+
+.quickHelp {
+    margin: 5px 5px 5px 5px;
+}
+
+.helpText {
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .journey {
@@ -12,9 +57,13 @@
     padding-bottom: 5px;
 }
 
+.journeyHeaderDetail {
+    font-style: italic;
+}
+
 .station {
     padding-left: 10px;
-    background-color: LightBlue;
+    background-color: LightGray;
     font-weight: bold;
 }
 
@@ -25,7 +74,7 @@
 .routeOption {
     display: flex;
     flex-direction: row;
-    background-color: MintCream;
+    background-color: GhostWhite;
 }
 
 .lineNameContainer {
