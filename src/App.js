@@ -3,15 +3,16 @@ import { useState, useEffect } from "react";
 import { useSpeechContext, SpeechState } from "@speechly/react-client";
 
 function SearchForm(props) {
+  const formState = props.state;
   return (
     <div>
       <div className="inputFieldContainer">
-        <input type="text" value={props.from} className="inputField stationInput" />
-        <input type="text" value={props.departure} className="inputField timeInput" />
+        <input type="text" value={formState.fromText} className="inputField stationInput" />
+        <input type="text" value={formState.departure} className="inputField timeInput" />
       </div>
       <div className="inputFieldContainer">
-        <input type="text" value={props.to} className="inputField stationInput" />
-        <input type="text" value={props.arrival} className="inputField timeInput" />
+        <input type="text" value={formState.toText} className="inputField stationInput" />
+        <input type="text" value={formState.arrival} className="inputField timeInput" />
       </div>
     </div>
   )
@@ -93,22 +94,24 @@ function ResultList(props) {
 }
 
 function MoreInfo(props) {
-  let buttonText = "(click here for more info)";
+  let buttonText = "tap here for more info";
   if (props.show) {
-    buttonText = "(click here to close info)";
+    buttonText = "tap here to close info";
   }
   return (
       <div>
-      <div className="infoButton" onClick={() => props.setStatus(!props.show)}>{buttonText}</div>
-      {props.show &&
-        <div className="helpText">
-          <h1>About</h1>
-          <p>Plan journeys in the London Tube network by saying the station you are starting from, and what station you want to go to. (Sorry, it does not support addresses or other points of interest, yet.)</p>
-          <p>You can also specify the departure or arrival time, for example <i>"from canary wharf to south kensington departing at six thirty pm"</i>.</p>
-          <p>The app requires access to microphone, but it <b>only</b> listens when you keep the microphone button pressed.</p>
-          <p>Built with <a href="https://www.speechly.com">Speechly</a> and <a href="https://tfl.gov.uk/info-for/open-data-users/unified-api">Transport for London Unified API</a>.</p>
+        <div className="infoButtonContainer">
+          <div className="infoButton" onClick={() => props.setStatus(!props.show)}>{buttonText}</div>
         </div>
-      }
+        {props.show &&
+          <div className="helpText">
+            <h1>About</h1>
+            <p>Plan journeys in the London Tube network by saying the station you are starting from, and what station you want to go to. (No support for addresses or other points of interest, yet.)</p>
+            <p>You can also specify the departure or arrival time, for example <i>"from canary wharf to south kensington departing at six thirty pm"</i>.</p>
+            <p>The app requires access to microphone, but it <b>only</b> listens when you keep the microphone button pressed.</p>
+            <p>Built with <a href="https://www.speechly.com">Speechly</a> and <a href="https://tfl.gov.uk/info-for/open-data-users/unified-api">Transport for London Unified API</a>.</p>
+          </div>
+        }
       </div>
   )
 }
@@ -151,38 +154,45 @@ function getEntityText(words, start, end) {
   return text;
 }
 
-function parseEntities(segment) {
-  let fromValue = "";
-  let toValue = "";
-  let fromText = "from";
-  let toText = "to";
-  let arrival = "arrival";
-  let departure = "departure";
+function parseEntities(segment, prevState) {
+  let newState = prevState;
   if (segment && segment.entities) {
     segment.entities.forEach( (entity) => {
       if (entity.type === "from") {
-        fromValue = entity.value;
-        fromText = getEntityText(segment.words,
-                                 entity.startPosition,
-                                 entity.endPosition);
+        newState = {
+          ...newState,
+          fromValue: entity.value,
+          fromText: getEntityText(segment.words,
+                                  entity.startPosition,
+                                  entity.endPosition)
+        };
       }
       else if (entity.type === "to") {
-        toValue = entity.value;
-        toText = getEntityText(segment.words,
-                               entity.startPosition,
-                               entity.endPosition);
+        newState = {
+          ...newState,
+          toValue: entity.value,
+          toText: getEntityText(segment.words,
+                                entity.startPosition,
+                                entity.endPosition)
+        };
       }
       else if (entity.type === "arrival") {
-        arrival = entity.value;
+        newState = {
+          ...newState,
+          arrival: entity.value,
+          departure: "departure"
+        };
       }
       else if (entity.type === "departure") {
-        departure = entity.value;
+        newState = {
+          ...newState,
+          arrival: "arrival",
+          departure: entity.value
+        };
       }
     });
   }
-  return {fromValue: fromValue, toValue: toValue,
-          fromText: fromText, toText: toText,
-          arrival: arrival, departure: departure};
+  return newState;
 }
 
 function App() {
@@ -190,37 +200,44 @@ function App() {
   const [data, setData] = useState(undefined);
   const [fetching, setFetching] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [formState, setFormState] = useState({fromValue: "", toValue: "",
+                                              fromText: "from", toText: "to",
+                                              arrival: "arrival", departure: "departure"});
 
   if (showInfo && speechState === SpeechState.NoAudioConsent) {
     setShowInfo(false);
   }
 
   useEffect(() => {
+    const entities = parseEntities(segment, formState);
+    setFormState(entities);
+    console.log(entities);
+  }, [segment]);
+
+  useEffect(() => {
     if (segment && segment.isFinal) {
-      const entities = parseEntities(segment);
       let time = undefined;
       let timeType = undefined;
-      if (entities.arrival !== "arrival") {
+      if (formState.arrival !== "arrival") {
         timeType = "arriving";
-        time = entities.arrival.replaceAll(":", "");
+        time = formState.arrival.replaceAll(":", "");
       }
-      else if (entities.departure !== "departure") {
+      else if (formState.departure !== "departure") {
         timeType = "departing";
-        time = entities.departure.replaceAll(":", "");
+        time = formState.departure.replaceAll(":", "");
       }
-      if (entities.fromValue.startsWith("940") && entities.toValue.startsWith("940")) {
-        callApi(entities.fromValue, entities.toValue, time, timeType, setData, setFetching, setShowInfo);
+      if (formState.fromValue.startsWith("940") && formState.toValue.startsWith("940")) {
+        callApi(formState.fromValue, formState.toValue, time, timeType, setData, setFetching, setShowInfo);
       }
     }
   }, [segment]);
 
-  const entities = parseEntities(segment);
   return (
     <div className="App">
       <h1>London Tube Journey Planner</h1>
-      <div className="quickHelp">Hold down the microphone, and say e.g. <i>"from london bridge to oxford circus"</i>.</div>
+      <div className="quickHelp">Press and hold the microphone button, and say e.g. <i>"from london bridge to oxford circus"</i>.</div>
       <MoreInfo show={showInfo} setStatus={setShowInfo} />
-      <SearchForm from={entities.fromText} to={entities.toText} arrival={entities.arrival} departure={entities.departure}/>
+      <SearchForm state={formState} />
       {speechState === SpeechState.NoAudioConsent &&
         <NoAudioConsentInfo />
       }
