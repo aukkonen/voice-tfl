@@ -20,8 +20,9 @@ The data used here was obtained by first getting a list of metro station names:
 curl https://api.tfl.gov.uk/StopPoint/Type/NaptanMetroStation > naptan_metro_station.json
 ```
 
-The `underground.csv` file used in the config was then created by first running
+The `underground.csv` and `dlr.csv` files used in the config was then created by first running
 ```
 jq -r '.[] | [.naptanId , .commonName] | @tsv' < naptan_metro_station.json | grep Underground | tr -d '"' | tr '\t' ',' | sed -r 's/ Underground Station//' > underground.csv
+jq -r '.[] | [.naptanId , .commonName] | @tsv' < naptan_metro_station.json | grep DLR | tr -d '"' | tr '\t' ',' | sed -r 's/ DLR Station//' > dlr.csv
 ```
 and then doing some manual cleanup to remove things in parenthesis etc.

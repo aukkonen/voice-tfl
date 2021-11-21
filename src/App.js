@@ -1,17 +1,24 @@
 import "./App.css";
 import { useState, useEffect } from "react";
 import { useSpeechContext, SpeechState } from "@speechly/react-client";
+import { VoiceSelect } from '@speechly/react-voice-forms'
+import { stations } from "./stations.json";
+
+// <input type="text" value={formState.fromText} className="inputField stationInput" />
+
+const stationNames = stations.map(station => {return station.label});
+console.log(stationNames);
 
 function SearchForm(props) {
   const formState = props.state;
   return (
     <div>
       <div className="inputFieldContainer">
-        <input type="text" value={formState.fromText} className="inputField stationInput" />
+        <VoiceSelect label="from" displayNames={stationNames} changeOnEntity="from" />
         <input type="text" value={formState.departure} className="inputField timeInput" />
       </div>
       <div className="inputFieldContainer">
-        <input type="text" value={formState.toText} className="inputField stationInput" />
+        <VoiceSelect label="to" displayNames={stationNames} changeOnEntity="to" />
         <input type="text" value={formState.arrival} className="inputField timeInput" />
       </div>
     </div>
