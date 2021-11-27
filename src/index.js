@@ -13,7 +13,7 @@ ReactDOM.render(
         placement="top"
         formatText={false}
       />
-      <PushToTalkButton intro="Hold to talk" captureKey=" " placement="bottom" />
+      <PushToTalkButton intro="Hold and talk" captureKey=" " placement="bottom" />
       <App />
     </SpeechProvider>,
   document.getElementById('root')

@@ -7,18 +7,30 @@ import { stations } from "./stations.json";
 // <input type="text" value={formState.fromText} className="inputField stationInput" />
 
 const stationNames = stations.map(station => {return station.label});
-console.log(stationNames);
+
+const PLAN_JOURNEY_VIEW = 1;
+const HELP_VIEW = 2;
+
+function NavBar(props) {
+  return (
+    <header className="navbar">
+      <div className="navbar__item" onClick={() => props.setActiveView(PLAN_JOURNEY_VIEW)}>Plan Journey</div>
+      <div className='navbar__item' onClick={() => props.setActiveView(HELP_VIEW)}>Help</div>
+    </header>
+  )
+}
 
 function SearchForm(props) {
   const formState = props.state;
+  console.log(stationNames);
   return (
     <div>
       <div className="inputFieldContainer">
-        <VoiceSelect label="from" displayNames={stationNames} changeOnEntity="from" />
+        <VoiceSelect label="from" options={stationNames} displayNames={stationNames} changeOnEntity="from" />
         <input type="text" value={formState.departure} className="inputField timeInput" />
       </div>
       <div className="inputFieldContainer">
-        <VoiceSelect label="to" displayNames={stationNames} changeOnEntity="to" />
+        <VoiceSelect label="to" options={stationNames} displayNames={stationNames} changeOnEntity="to" />
         <input type="text" value={formState.arrival} className="inputField timeInput" />
       </div>
     </div>
@@ -100,26 +112,42 @@ function ResultList(props) {
   )
 }
 
-function MoreInfo(props) {
-  let buttonText = "tap here for more info";
-  if (props.show) {
-    buttonText = "tap here to close info";
-  }
+function PlanView(props) {
   return (
-      <div>
-        <div className="infoButtonContainer">
-          <div className="infoButton" onClick={() => props.setStatus(!props.show)}>{buttonText}</div>
-        </div>
-        {props.show &&
-          <div className="helpText">
-            <h1>About</h1>
-            <p>Plan journeys in the London Tube network by saying the station you are starting from, and what station you want to go to. (No support for addresses or other points of interest, yet.)</p>
-            <p>You can also specify the departure or arrival time, for example <i>"from canary wharf to south kensington departing at six thirty pm"</i>.</p>
-            <p>The app requires access to microphone, but it <b>only</b> listens when you keep the microphone button pressed.</p>
-            <p>Built with <a href="https://www.speechly.com">Speechly</a> and <a href="https://tfl.gov.uk/info-for/open-data-users/unified-api">Transport for London Unified API</a>.</p>
-          </div>
-        }
-      </div>
+    <div>
+      <div className="quickHelp">Press and hold the microphone button, and say e.g. <i>"from london bridge to oxford circus"</i>.</div>
+      <SearchForm state={props.formState} />
+      {props.speechState === SpeechState.NoAudioConsent &&
+        <NoAudioConsentInfo />
+      }
+      {props.fetching &&
+        <h1>Fetching results...</h1>
+      }
+      {(props.data && !props.fetching) &&
+        <ResultList data={props.data} />
+      }
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+    </div>
+  )
+}
+
+function HelpView() {
+  return (
+    <div className="helpText">
+      <h1>About</h1>
+      <p>Plan journeys in the London Tube network by saying the station you are starting from, and what station you want to go to. (No support for addresses or other points of interest, yet.)</p>
+      <p>You can also specify the departure or arrival time, for example <i>"from canary wharf to south kensington departing at six thirty pm"</i>.</p>
+      <p>The app requires access to microphone, but it <b>only</b> listens when you keep the microphone button pressed.</p>
+      <p>Built with <a href="https://www.speechly.com">Speechly</a> and <a href="https://tfl.gov.uk/info-for/open-data-users/unified-api">Transport for London Unified API</a>.</p>
+    </div>
   )
 }
 
@@ -206,14 +234,16 @@ function App() {
   const { segment, speechState } = useSpeechContext();
   const [data, setData] = useState(undefined);
   const [fetching, setFetching] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
+  const [activeView, setActiveView] = useState(PLAN_JOURNEY_VIEW);
   const [formState, setFormState] = useState({fromValue: "", toValue: "",
                                               fromText: "from", toText: "to",
                                               arrival: "arrival", departure: "departure"});
 
-  if (showInfo && speechState === SpeechState.NoAudioConsent) {
-    setShowInfo(false);
-  }
+  // if (showInfo && speechState === SpeechState.NoAudioConsent) {
+  //   setShowInfo(false);
+  // }
+
+  let setShowInfo = () => {};
 
   useEffect(() => {
     const entities = parseEntities(segment, formState);
@@ -241,28 +271,13 @@ function App() {
 
   return (
     <div className="App">
-      <h1>London Tube Journey Planner</h1>
-      <div className="quickHelp">Press and hold the microphone button, and say e.g. <i>"from london bridge to oxford circus"</i>.</div>
-      <MoreInfo show={showInfo} setStatus={setShowInfo} />
-      <SearchForm state={formState} />
-      {speechState === SpeechState.NoAudioConsent &&
-        <NoAudioConsentInfo />
+      <NavBar setActiveView={setActiveView} />
+      {activeView === PLAN_JOURNEY_VIEW &&
+        <PlanView formState={formState} speechState={speechState} fetching={fetching} data={data}/>
       }
-      {fetching &&
-        <h1>Fetching results...</h1>
+      {activeView === HELP_VIEW &&
+        <HelpView />
       }
-      {(data && !fetching) &&
-        <ResultList data={data} />
-      }
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
     </div>
   );
 }

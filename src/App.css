@@ -6,6 +6,20 @@
     height: 100%;
 }
 
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    background: #1b3d8d;
+}
+
+.navbar__item {
+    padding: 16px 16px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
 h1 {
     font-size: 18px;
     margin-left: 5px;
@@ -32,19 +46,6 @@ p {
 
 .timeInput {
     width: 30%;
-}
-
-.infoButtonContainer {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-}
-
-.infoButton {
-    text-align: center;
-    background-color: GhostWhite;
-    padding: 5px 5px 5px 5px;
 }
 
 .quickHelp {
