@@ -4,8 +4,6 @@ import { useSpeechContext, SpeechState } from "@speechly/react-client";
 import { VoiceSelect } from '@speechly/react-voice-forms'
 import { stations } from "./stations.json";
 
-// <input type="text" value={formState.fromText} className="inputField stationInput" />
-
 stations.sort((s1, s2) => {return s1.label.localeCompare(s2.label)});
 const stationNames = [''].concat(stations.map(station => {return station.label}));
 const stationNaptan = [''].concat(stations.map(station => {return station.naptan}));
@@ -22,6 +20,18 @@ function NavBar(props) {
   )
 }
 
+// <input
+//   type="text"
+//   value={state.departure}
+//   onChange={(newValue) => setState({...state, departure: newValue})}
+//   className="inputField timeInput" />
+
+// <input
+//   type="text"
+//   value={state.arrival}
+//   onChange={(evt) => console.log(evt)}
+//   className="inputField timeInput" />
+
 function SearchForm(props) {
   const state = props.state;
   const setState = props.setState;
@@ -35,7 +45,6 @@ function SearchForm(props) {
           changeOnEntity="from"
           value={state.fromValue}
           onChange={(newValue) => setState({...state, fromValue: newValue})} />
-        <input type="text" value={state.departure} className="inputField timeInput" />
       </div>
       <div className="inputFieldContainer">
         <VoiceSelect
@@ -45,7 +54,6 @@ function SearchForm(props) {
           changeOnEntity="to"
           value={state.toValue}
           onChange={(newValue) => setState({...state, toValue: newValue})} />
-        <input type="text" value={state.arrival} className="inputField timeInput" />
       </div>
     </div>
   )
@@ -179,12 +187,11 @@ function parseTime(dateTimeStr) {
   return new Date(dateTimeStr).toTimeString().substring(0, 5);
 }
 
-function callApi(from, to, time, timeIs, setData, setFetching, setInfoVisibility) {
+function callApi(from, to, time, timeIs, setData, setFetching) {
   let url = `https://api.tfl.gov.uk/Journey/JourneyResults/${from}/to/${to}`;
   if (time !== undefined) {
     url = `https://api.tfl.gov.uk/Journey/JourneyResults/${from}/to/${to}?time=${time}&timeIs=${timeIs}`;
   }
-  setInfoVisibility(false);
   setFetching(true);
   fetch(url, {method: "GET"})
     .then(res => res.json())
@@ -195,14 +202,6 @@ function callApi(from, to, time, timeIs, setData, setFetching, setInfoVisibility
     });
 }
 
-function getEntityText(words, start, end) {
-  const text = words
-        .filter(word => { return (word.index >= start && word.index < end) })
-        .map(word => { return word.value.toLowerCase() })
-        .join(' ');
-  return text;
-}
-
 function parseEntities(segment, prevState) {
   let newState = prevState;
   if (segment && segment.entities) {
@@ -210,19 +209,13 @@ function parseEntities(segment, prevState) {
       if (entity.type === "from") {
         newState = {
           ...newState,
-          fromValue: entity.value,
-          fromText: getEntityText(segment.words,
-                                  entity.startPosition,
-                                  entity.endPosition)
+          fromValue: entity.value
         };
       }
       else if (entity.type === "to") {
         newState = {
           ...newState,
-          toValue: entity.value,
-          toText: getEntityText(segment.words,
-                                entity.startPosition,
-                                entity.endPosition)
+          toValue: entity.value
         };
       }
       else if (entity.type === "arrival") {
@@ -250,34 +243,29 @@ function App() {
   const [fetching, setFetching] = useState(false);
   const [activeView, setActiveView] = useState(PLAN_JOURNEY_VIEW);
   const [formState, setFormState] = useState({fromValue: "", toValue: "",
-                                              fromText: "from", toText: "to",
                                               arrival: "arrival", departure: "departure"});
-
-  let setShowInfo = () => {};
 
   useEffect(() => {
     const entities = parseEntities(segment, formState);
     setFormState(entities);
     console.log(entities);
-  }, [segment]);
+  }, [segment, formState]);
 
   useEffect(() => {
-    if (segment && segment.isFinal) {
-      let time = undefined;
-      let timeType = undefined;
-      if (formState.arrival !== "arrival") {
-        timeType = "arriving";
-        time = formState.arrival.replaceAll(":", "");
-      }
-      else if (formState.departure !== "departure") {
-        timeType = "departing";
-        time = formState.departure.replaceAll(":", "");
-      }
-      if (formState.fromValue.startsWith("940") && formState.toValue.startsWith("940")) {
-        callApi(formState.fromValue, formState.toValue, time, timeType, setData, setFetching, setShowInfo);
-      }
+    let time = undefined;
+    let timeType = undefined;
+    if (formState.arrival !== "arrival") {
+      timeType = "arriving";
+      time = formState.arrival.replaceAll(":", "");
     }
-  }, [segment]);
+    else if (formState.departure !== "departure") {
+      timeType = "departing";
+      time = formState.departure.replaceAll(":", "");
+    }
+    if (formState.fromValue.startsWith("9") && formState.toValue.startsWith("9")) {
+      callApi(formState.fromValue, formState.toValue, time, timeType, setData, setFetching);
+    }
+  }, [formState.fromValue, formState.toValue]);
 
   useEffect(() => {
     if (activeView === HELP_VIEW &&
@@ -286,7 +274,7 @@ function App() {
          speechState === SpeechState.NoAudioConsent)) {
       setActiveView(PLAN_JOURNEY_VIEW);
     }
-  });
+  }, [activeView, speechState]);
 
   console.log(formState);
 
