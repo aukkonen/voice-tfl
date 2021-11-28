@@ -6,7 +6,9 @@ import { stations } from "./stations.json";
 
 // <input type="text" value={formState.fromText} className="inputField stationInput" />
 
-const stationNames = stations.map(station => {return station.label});
+stations.sort((s1, s2) => {return s1.label.localeCompare(s2.label)});
+const stationNames = [''].concat(stations.map(station => {return station.label}));
+const stationNaptan = [''].concat(stations.map(station => {return station.naptan}));
 
 const PLAN_JOURNEY_VIEW = 1;
 const HELP_VIEW = 2;
@@ -21,17 +23,29 @@ function NavBar(props) {
 }
 
 function SearchForm(props) {
-  const formState = props.state;
-  console.log(stationNames);
+  const state = props.state;
+  const setState = props.setState;
   return (
     <div>
       <div className="inputFieldContainer">
-        <VoiceSelect label="from" options={stationNames} displayNames={stationNames} changeOnEntity="from" />
-        <input type="text" value={formState.departure} className="inputField timeInput" />
+        <VoiceSelect
+          label="from"
+          options={stationNaptan}
+          displayNames={stationNames}
+          changeOnEntity="from"
+          value={state.fromValue}
+          onChange={(newValue) => setState({...state, fromValue: newValue})} />
+        <input type="text" value={state.departure} className="inputField timeInput" />
       </div>
       <div className="inputFieldContainer">
-        <VoiceSelect label="to" options={stationNames} displayNames={stationNames} changeOnEntity="to" />
-        <input type="text" value={formState.arrival} className="inputField timeInput" />
+        <VoiceSelect
+          label="to"
+          options={stationNaptan}
+          displayNames={stationNames}
+          changeOnEntity="to"
+          value={state.toValue}
+          onChange={(newValue) => setState({...state, toValue: newValue})} />
+        <input type="text" value={state.arrival} className="inputField timeInput" />
       </div>
     </div>
   )
@@ -116,7 +130,7 @@ function PlanView(props) {
   return (
     <div>
       <div className="quickHelp">Press and hold the microphone button, and say e.g. <i>"from london bridge to oxford circus"</i>.</div>
-      <SearchForm state={props.formState} />
+      <SearchForm state={props.formState} setState={props.setFormState} />
       {props.speechState === SpeechState.NoAudioConsent &&
         <NoAudioConsentInfo />
       }
@@ -239,10 +253,6 @@ function App() {
                                               fromText: "from", toText: "to",
                                               arrival: "arrival", departure: "departure"});
 
-  // if (showInfo && speechState === SpeechState.NoAudioConsent) {
-  //   setShowInfo(false);
-  // }
-
   let setShowInfo = () => {};
 
   useEffect(() => {
@@ -269,11 +279,27 @@ function App() {
     }
   }, [segment]);
 
+  useEffect(() => {
+    if (activeView === HELP_VIEW &&
+        (speechState === SpeechState.Starting ||
+         speechState === SpeechState.Recording ||
+         speechState === SpeechState.NoAudioConsent)) {
+      setActiveView(PLAN_JOURNEY_VIEW);
+    }
+  });
+
+  console.log(formState);
+
   return (
     <div className="App">
       <NavBar setActiveView={setActiveView} />
       {activeView === PLAN_JOURNEY_VIEW &&
-        <PlanView formState={formState} speechState={speechState} fetching={fetching} data={data}/>
+       <PlanView
+         formState={formState}
+         setFormState={setFormState}
+         speechState={speechState}
+         fetching={fetching}
+         data={data}/>
       }
       {activeView === HELP_VIEW &&
         <HelpView />
