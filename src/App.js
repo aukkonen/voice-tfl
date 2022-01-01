@@ -173,6 +173,15 @@ function HelpView() {
       <p>You can also specify the departure or arrival time, for example: <i><b>"from canary wharf to south kensington departing at six thirty pm"</b></i>.</p>
       <p>The app requires access to microphone, but it listens only when you keep the microphone button pressed.</p>
       <p>Built with <a href="https://www.speechly.com">Speechly</a> and <a href="https://tfl.gov.uk/info-for/open-data-users/unified-api">Transport for London Unified API</a>.</p>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
     </div>
   )
 }
