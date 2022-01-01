@@ -1,10 +1,10 @@
 enable_strict_nlu: true
 imports:
   - name: naptan_id
-    source: underground.csv
+    source: stations.csv
     field: 1
   - name: station_names
-    source: underground.csv
+    source: stations.csv
     field: 2
 entities:
   - name: from
@@ -22,9 +22,8 @@ entities:
   - name: arrival
     type: time
 templates: |
-  station = $station_names {0.1: {[metro | underground | tube]} station}
-  from_phrase = [from](from_prepo) $station(from)
-  to_phrase = [to](to_prepo) $station(to)
+  from_phrase = [from](from_prepo) $station_names(from)
+  to_phrase = [to](to_prepo) $station_names(to)
   depart_phrase = [[departure | departing | leaving | going] at](depart_prepo) $SPEECHLY.TIME(departure)
   arrive_phrase = [[arriving | arrival] at](arrive_prepo) $SPEECHLY.TIME(arrival)
   *search ![$from_phrase | $to_phrase | $depart_phrase]
