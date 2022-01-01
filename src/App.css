@@ -30,22 +30,14 @@ p {
     margin-top: 0px;
 }
 
+select, input {
+  font-size: 1.0rem;
+}
+
 .inputFieldContainer {
     margin: 10px 10px 10px 10px;
     display: flex;
-}
-
-.inputField {
-    font-size: 16px;
-    color: grey;
-}
-
-.stationInput {
-    width: 70%;
-}
-
-.timeInput {
-    width: 30%;
+    flex-direction: row;
 }
 
 .quickHelp {
