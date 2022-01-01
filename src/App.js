@@ -208,7 +208,7 @@ function callApi(from, to, time, timeIs, setData, setFetching) {
 }
 
 function App() {
-  const { speechState } = useSpeechContext();
+  const { segment, speechState } = useSpeechContext();
   const [data, setData] = useState(undefined);
   const [fetching, setFetching] = useState(false);
   const [activeView, setActiveView] = useState(PLAN_JOURNEY_VIEW);
@@ -218,6 +218,10 @@ function App() {
   const [arrival, setArrival] = useState("");
 
   useEffect(() => {
+    console.log(segment);
+    if (segment && !segment.isFinal) {
+      return;
+    }
     let time = undefined;
     let timeType = undefined;
     if (arrival !== "") {
@@ -231,7 +235,7 @@ function App() {
     if (from.startsWith("9") && to.startsWith("9")) {
       callApi(from, to, time, timeType, setData, setFetching);
     }
-  }, [from, to, departure, arrival]);
+  }, [segment, from, to, departure, arrival]);
 
   useEffect(() => {
     if (activeView === HELP_VIEW &&
