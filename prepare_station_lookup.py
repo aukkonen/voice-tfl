@@ -38,6 +38,7 @@ def main():
                 if overrides.get((station_type, prev_type), False):
                     expanded_data[variant] = (naptan, station_type)
     for (name, (naptan, station_type)) in expanded_data.items():
+        name = name.replace(')', '')
         print(f'{naptan},{name}')
 
 if __name__=='__main__':
