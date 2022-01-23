@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/voice-tfl/static/css/main.298888de.chunk.css",
+    "main.js": "/voice-tfl/static/js/main.956ac268.chunk.js",
+    "main.js.map": "/voice-tfl/static/js/main.956ac268.chunk.js.map",
+    "runtime-main.js": "/voice-tfl/static/js/runtime-main.eb32c9fe.js",
+    "runtime-main.js.map": "/voice-tfl/static/js/runtime-main.eb32c9fe.js.map",
+    "static/js/2.859de238.chunk.js": "/voice-tfl/static/js/2.859de238.chunk.js",
+    "static/js/2.859de238.chunk.js.map": "/voice-tfl/static/js/2.859de238.chunk.js.map",
+    "index.html": "/voice-tfl/index.html",
+    "static/css/main.298888de.chunk.css.map": "/voice-tfl/static/css/main.298888de.chunk.css.map",
+    "static/js/2.859de238.chunk.js.LICENSE.txt": "/voice-tfl/static/js/2.859de238.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.eb32c9fe.js",
+    "static/js/2.859de238.chunk.js",
+    "static/css/main.298888de.chunk.css",
+    "static/js/main.956ac268.chunk.js"
+  ]
+}
