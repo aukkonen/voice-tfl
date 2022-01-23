@@ -38,6 +38,7 @@ select, input {
     margin: 10px 10px 10px 10px;
     display: flex;
     flex-direction: row;
+    gap: 10px;
 }
 
 .quickHelp {

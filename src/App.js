@@ -1,7 +1,7 @@
 import "./App.css";
 import { useState, useEffect } from "react";
 import { useSpeechContext, SpeechState } from "@speechly/react-client";
-import { VoiceSelect, VoiceInput } from '@speechly/react-voice-forms'
+import { VoiceSelect, VoiceInput, VoiceToggle } from '@speechly/react-voice-forms'
 import './capsule.css'
 import { stations } from "./stations.json";
 
@@ -31,7 +31,8 @@ function SearchForm(props) {
           displayNames={stationNames}
           changeOnEntityType="from"
           value={props.from}
-          onChange={(newValue) => props.setFrom(newValue)} />
+          onChange={(newValue) => props.setFrom(newValue)}
+        />
       </div>
       <div className="inputFieldContainer">
         <VoiceSelect
@@ -40,23 +41,34 @@ function SearchForm(props) {
           displayNames={stationNames}
           changeOnEntityType="to"
           value={props.to}
-          onChange={(newValue) => props.setTo(newValue)} />
+          onChange={(newValue) => props.setTo(newValue)}
+        />
       </div>
       <div className="inputFieldContainer">
-        <VoiceInput
-          label="Departure"
-          value={props.departure}
-          changeOnEntityType="departure"
+        <VoiceToggle
+          options={["departure", "arrival"]}
+          displayNames={["Departure", "Arrival"]}
+          changeOnEntityType={["depart_prepo", "arrive_prepo"]}
           onChange={(newValue) => {
-            props.setDeparture(newValue);
-          }} />
+            if (newValue === "departure") {
+              props.setTimeType("departing");
+              console.log('set timeType to departing');
+            }
+            else if (newValue === "arrival") {
+              props.setTimeType("arriving");
+              console.log('set timeType to arriving');
+            }
+          }}
+        />
         <VoiceInput
-          label="Arrival"
-          value={props.arrival}
-          changeOnEntityType="arrival"
+          label="Time"
+          value={props.time}
+          changeOnEntityType="time"
           onChange={(newValue) => {
-            props.setArrival(newValue);
-          }} />
+            console.log('seeting new time value', newValue);
+            props.setTime(newValue);
+          }}
+        />
       </div>
     </div>
   )
@@ -141,7 +153,7 @@ function PlanView(props) {
   return (
     <div>
       <div className="quickHelp">Hold the microphone button, and say e.g.<br/> <i><b>"from london bridge to oxford circus"</b></i>.</div>
-      <SearchForm setFrom={props.setFrom} setTo={props.setTo} setDeparture={props.setDeparture} setArrival={props.setArrival} from={props.from} to={props.to} departure={props.departure} arrival={props.arrival} />
+      <SearchForm setFrom={props.setFrom} setTo={props.setTo} from={props.from} to={props.to} time={props.time} setTime={props.setTime} timeType={props.timeType} setTimeType={props.setTimeType} />
       {props.speechState === SpeechState.NoAudioConsent &&
         <NoAudioConsentInfo />
       }
@@ -223,28 +235,21 @@ function App() {
   const [activeView, setActiveView] = useState(PLAN_JOURNEY_VIEW);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [departure, setDeparture] = useState("");
-  const [arrival, setArrival] = useState("");
+  const [time, setTime] = useState("");
+  const [timeType, setTimeType] = useState("departure");
 
   useEffect(() => {
-    console.log(segment);
     if (segment && !segment.isFinal) {
       return;
     }
-    let time = undefined;
-    let timeType = undefined;
-    if (arrival !== "") {
-      timeType = "arriving";
-      time = arrival.replaceAll(":", "");
-    }
-    else if (departure !== "") {
-      timeType = "departing";
-      time = departure.replaceAll(":", "");
+    let apiTime = undefined;
+    if (time && time !== "") {
+      apiTime = time.replaceAll(":", "");
     }
     if (from.startsWith("9") && to.startsWith("9")) {
-      callApi(from, to, time, timeType, setData, setFetching);
+      callApi(from, to, apiTime, timeType, setData, setFetching);
     }
-  }, [segment, from, to, departure, arrival]);
+  }, [segment, from, to, time]);
 
   useEffect(() => {
     if (activeView === HELP_VIEW &&
@@ -255,7 +260,7 @@ function App() {
     }
   }, [activeView, speechState]);
 
-  console.log(from, to, departure, arrival);
+  console.log(segment?.entities);
 
   return (
     <div className="App">
@@ -264,12 +269,12 @@ function App() {
        <PlanView
          from={from}
          to={to}
-         departure={departure}
-         arrival={arrival}
          setFrom={setFrom}
          setTo={setTo}
-         setDeparture={setDeparture}
-         setArrival={setArrival}
+         time={time}
+         setTime={setTime}
+         timeType={timeType}
+         setTimeType={setTimeType}
          speechState={speechState}
          fetching={fetching}
          data={data}/>
