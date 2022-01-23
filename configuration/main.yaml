@@ -6,6 +6,18 @@ imports:
   - name: station_names
     source: stations.csv
     field: 2
+  - name: arrival_as_spoken
+    source: arrival.csv
+    field: 1
+  - name: arrival_out
+    source: arrival.csv
+    field: 2
+  - name: departure_as_spoken
+    source: departure.csv
+    field: 1
+  - name: departure_out
+    source: departure.csv
+    field: 2
 entities:
   - name: from
     type: lookup
@@ -17,14 +29,20 @@ entities:
     input_items: $station_names
     output_items: $naptan_id
     variant: snapping
-  - name: departure
-    type: time
-  - name: arrival
+  - name: depart_prepo
+    type: lookup
+    input_items: $departure_as_spoken
+    output_items: $departure_out
+  - name: arrival_prepo
+    type: lookup
+    input_items: $arrival_as_spoken
+    output_items: $arrival_out
+  - name: time
     type: time
 templates: |
   from_phrase = [from](from_prepo) $station_names(from)
   to_phrase = [to](to_prepo) $station_names(to)
-  depart_phrase = [[departure | departing | leaving | going] at](depart_prepo) $SPEECHLY.TIME(departure)
-  arrive_phrase = [[arriving | arrival] at](arrive_prepo) $SPEECHLY.TIME(arrival)
+  depart_phrase = $departure_as_spoken(depart_prepo) $SPEECHLY.TIME(time)
+  arrive_phrase = $arrival_as_spoken(arrive_prepo) $SPEECHLY.TIME(time)
   *search ![$from_phrase | $to_phrase | $depart_phrase]
   *search ![$from_phrase | $to_phrase | $arrive_phrase]
