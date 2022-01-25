@@ -1,28 +1,19 @@
-# london-jp
-Voice enabled journey planner for London public transport
+# Voice-TFL
+Voice enabled journey planner for London public transport built with [Speechly](https://github.com/speechly/speechly) and Transport For London Unified API.
 
-## Getting started
+See it in action at https://aukkonen.github.io/voice-tfl
+
+The design is optimised for mobile devices, and hence looks a bit silly on a desktop.
+
+## Running locally
 Run git clone, and then
 ```
+make imports
 npm intall
 npm start
 ```
 That should be it.
 
-(If `npm install` complains something about react-voice-forms, just remove the dependency from package.json for now.)
+## Speechly configuration
 
-## How data was obtained
-
-The app maps human readable underground station names to so called "naptan identifiers" that are used by the API.
-
-The data used here was obtained by first getting a list of metro station names:
-```
-curl https://api.tfl.gov.uk/StopPoint/Type/NaptanMetroStation > naptan_metro_station.json
-```
-
-The `underground.csv` and `dlr.csv` files used in the config was then created by first running
-```
-jq -r '.[] | [.naptanId , .commonName] | @tsv' < naptan_metro_station.json | grep Underground | tr -d '"' | tr '\t' ',' | sed -r 's/ Underground Station//' > underground.csv
-jq -r '.[] | [.naptanId , .commonName] | @tsv' < naptan_metro_station.json | grep DLR | tr -d '"' | tr '\t' ',' | sed -r 's/ DLR Station//' > dlr.csv
-```
-and then doing some manual cleanup to remove things in parenthesis etc.
+Is in the `config` directory. You will need the [Speechly Command Line Tool](https://docs.speechly.com/dev-tools/command-line-client/) to deploy it, as well as a valid Speechly App Id. The latter you can get by signing up on the [Speechly Dashboard](https://www.speechly.com/dashboard).
